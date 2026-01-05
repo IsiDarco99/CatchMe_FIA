@@ -16,17 +16,18 @@ map_data = [
     "#...###.........#",
     "#...###...#######",
     "#.........#.....#",
-    "#.#...#.#.#.....#",
-    "#.#...#.#.......#",
-    "#.#####.#.#.....#",
-    "#.......#.#.....#",
+    "#.#...#.#.#...#.#",
+    "#.#...#.#.#...#.#",
+    "#.#####.#.....#.#",
+    "#.......#.....#.#",
     "#################"
 ]
 
 env = GridEnvironment(map_data)
 
-env.spawn_power_ups(num_power_ups=3, power_up_type="speed_boost")
-print(f"Spawned {len(env.power_ups)} power-ups at: {list(env.power_ups.keys())}")
+# Spawn different power-ups
+env.spawn_power_ups(speed_boosts=2, wall_builders=2, ghost_modes=2)
+teleport_pos = env.spawn_teleport()
 
 catcher_pos = env.get_random_spawn_position(row_range=(1, 4))
 runner_pos = env.get_random_spawn_position(row_range=(14, 17))

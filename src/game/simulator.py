@@ -1,6 +1,24 @@
 import time
 
 class GameSimulator:
+    @staticmethod
+    def can_capture(catcher_pos, runner_pos):
+        """Check if catcher can capture runner (same position or diagonal)"""
+        c_row, c_col = catcher_pos
+        r_row, r_col = runner_pos
+        
+        # Same position
+        if c_row == r_row and c_col == r_col:
+            return True
+        
+        # Diagonal adjacent (one step away in both row and col)
+        row_diff = abs(c_row - r_row)
+        col_diff = abs(c_col - r_col)
+        if row_diff == 1 and col_diff == 1:
+            return True
+        
+        return False
+    
     def __init__(self, env, catcher, runner, max_turns=50, verbose=True):
         self.env = env
         self.catcher = catcher
@@ -34,20 +52,36 @@ class GameSimulator:
                 self.metrics["runner_times"].append(move_time)
             
             if action:
-                self.env.move_agent(agent.name, action)
+                # Check if action is tuple (direction, use_ghost_mode)
+                use_ghost = False
+                if isinstance(action, tuple):
+                    action, use_ghost = action
+                
+                self.env.move_agent(agent.name, action, use_ghost_mode=use_ghost)
                 agent.position = self.env.agents[agent.name]
             
             power_up = self.env.collect_power_up(agent.position)
-            if power_up == "speed_boost":
-                agent.activate_speed_boost()
+            if power_up:
+                if power_up == "speed_boost":
+                    agent.activate_speed_boost()
+                
+                elif power_up == "wall_builder":
+                    agent.add_to_inventory("wall_builder")
+                
+                elif power_up == "ghost_mode":
+                    agent.add_to_inventory("ghost_mode")
+                
+                elif power_up == "teleport":
+                    self.env.teleport_agent(agent.name)
+                    agent.position = self.env.agents[agent.name]
             
-            if self.catcher.position == self.runner.position:
+            if self.can_capture(self.catcher.position, self.runner.position):
                 return "catcher_won"
         
-        
         return None
-
-    def play(self):
+    
+    def run(self):
+        """Main game loop"""
         start_time = time.time()
         
         while self.turn < self.max_turns:
@@ -76,13 +110,11 @@ class GameSimulator:
                 return self.metrics
             
             self.runner.decrease_boost_turns()
-
+            
+            self.env.update_temporary_walls()
+            
             if self.verbose:
                 self.env.print_grid()
-                if self.catcher.has_speed_boost():
-                    print(f"Catcher speed boost: {self.catcher.speed_boost_turns} turns left")
-                if self.runner.has_speed_boost():
-                    print(f"Runner speed boost: {self.runner.speed_boost_turns} turns left")
             
             self.turn += 1
 

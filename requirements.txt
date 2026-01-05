@@ -3,7 +3,8 @@ cycler==0.12.1
 fonttools==4.61.1
 kiwisolver==1.4.9
 matplotlib==3.10.8
-numpy==2.4.0
+numpy
+pygame==2.4.0
 packaging==25.0
 pillow==12.0.0
 pygame==2.6.1

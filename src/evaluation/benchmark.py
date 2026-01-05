@@ -12,7 +12,6 @@ from datetime import datetime
 
 
 class Benchmark:
-    """Evaluation system to compare strategies."""
     
     def __init__(self, map_data, max_turns=50):
         self.map_data = map_data
@@ -31,7 +30,8 @@ class Benchmark:
         for i in range(num_games):
             env = GridEnvironment(self.map_data)
             
-            env.spawn_power_ups(num_power_ups=3, power_up_type="speed_boost")
+            env.spawn_power_ups(speed_boosts=3, wall_builders=2, ghost_modes=2)
+            env.spawn_teleport()
             
             catcher_pos = env.get_random_spawn_position(row_range=(1, 4))
             runner_pos = env.get_random_spawn_position(row_range=(14, 17))
@@ -43,7 +43,7 @@ class Benchmark:
             env.add_agent(runner.name, runner.position)
             
             game = GameSimulator(env, catcher, runner, max_turns=self.max_turns, verbose=False)
-            metrics = game.play()
+            metrics = game.run()
             
             game_results.append(metrics)
             
@@ -126,10 +126,10 @@ class Benchmark:
             print()
         
         print(f"⏱️  COMPUTATIONAL COST:")
-        print(f"  Avg Catcher time per move: {analysis['avg_catcher_time_per_move_ms']:.3f} ms")
-        print(f"  Avg Runner time per move:  {analysis['avg_runner_time_per_move_ms']:.3f} ms")
-        print(f"  Avg game time:             {analysis['avg_total_game_time_s']:.3f} s")
-        print(f"  Max game time:             {analysis['max_total_game_time_s']:.3f} s")
+        print(f"  Avg Catcher time per move: {analysis['avg_catcher_time_per_move_ms']:.4f} ms")
+        print(f"  Avg Runner time per move:  {analysis['avg_runner_time_per_move_ms']:.4f} ms")
+        print(f"  Avg game time:             {analysis['avg_total_game_time_s']:.4f} s")
+        print(f"  Max game time:             {analysis['max_total_game_time_s']:.4f} s")
         print()
         
         print(f"📈 STEPS PER EPISODE:")
@@ -138,29 +138,27 @@ class Benchmark:
 
 
 if __name__ == "__main__":
-    # Example map
     map_data = [
-        "#################",
-        "#...............#",
-        "#.#####...#.#...#",
-        "#.#.......#.#...#",
-        "#.#.###.###.###.#",
-        "#.#.#...........#",
-        "#.#.#...###.###.#",
-        "#.........#.#...#",
-        "#...###...#.#...#",
-        "#...###.........#",
-        "#...###...#######",
-        "#.........#.....#",
-        "#.#...#.#.#.....#",
-        "#.#...#.#.......#",
-        "#.#####.#.#.....#",
-        "#.......#.#.....#",
-        "#################"
-    ]
+    "#################",
+    "#...............#",
+    "#.#####...#.#...#",
+    "#.#.......#.#...#",
+    "#.#.###.###.###.#",
+    "#.#.#...........#",
+    "#.#.#...###.###.#",
+    "#.........#.#...#",
+    "#...###...#.#...#",
+    "#...###.........#",
+    "#...###...#######",
+    "#.........#.....#",
+    "#.#...#.#.#...#.#",
+    "#.#...#.#.#...#.#",
+    "#.#####.#.....#.#",
+    "#.......#.....#.#",
+    "#################"
+]
     
-    # Create benchmark
     benchmark = Benchmark(map_data, max_turns=50)
     
-    benchmark.run_experiments("astar", "greedy", num_games=100)
+    benchmark.run_experiments("minimax", "minimax", num_games=10)
     
